@@ -245,7 +245,7 @@ static simpple_http_request* parse_simpple_http_request(FILE *f)
 
 static void doResponse(FILE *f, simpple_http_request *request);
 void doResponseNotFound(FILE *f);
-static void handleRequest(FILE *f);
+static void handleRequest(int cfd);
 
 extern int path_compare(const void *path1, const void *path2);
 
@@ -263,8 +263,9 @@ static void doResponse(FILE *f, simpple_http_request *request)
     }
 }
 
-static void handleRequest(FILE *f)
+static void handleRequest(int cfd)
 {
+	FILE *f = fdopen(cfd, "r+b");
     simpple_http_request *request = parse_simpple_http_request(f);
     if (request) {
         Dprintf("request line : %d %s %s\n", request->requestLine.method, request->requestLine.path, request->requestLine.version);
@@ -348,7 +349,7 @@ void simple_http_server_start()
             }
         }
 
-        handleRequest(fdopen(cfd, "r+b"));
+        handleRequest(cfd);
     }
     Dprintf("exit loop\n");
 }
