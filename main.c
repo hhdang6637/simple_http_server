@@ -33,7 +33,7 @@ static void urlIndexHandler(FILE *f)
 
     fprintf(f, "HTTP/1.1 200"
             "\r\n"
-            "content-length: %lu"
+            "content-length: %zu"
             "\r\n"
             "content-type: text/html; charset=iso-8859-1"
             "\r\n"

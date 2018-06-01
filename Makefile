@@ -1,5 +1,5 @@
 CXX=gcc
-CXXFLAGS=-g -Wall
+CXXFLAGS=-m32 -Wall
 INCLUDES=
 BIN=simple_http_server
 
