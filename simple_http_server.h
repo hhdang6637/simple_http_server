@@ -12,8 +12,8 @@
 
 #define Dprintf(format, ...) fprintf (stderr,"%s:%d : " format , __FILE__, __LINE__, ##__VA_ARGS__)
 
-#define PATH_MAX_LENGTH  		256
-#define VERSION_MAX_LENGTH  	64
+#define PATH_MAX_LENGTH          256
+#define VERSION_MAX_LENGTH      64
 
 typedef struct simpple_http_request_header_field
 {
@@ -47,22 +47,22 @@ typedef struct simpple_http_request
 {
     simpple_http_request_line           requestLine;
     simpple_http_request_header_field   requestHeaderFields[MAX_FIELDS]; // end with NULL pointer
-    int 								numRequestHeaderFields;
+    int                                 numRequestHeaderFields;
 } simpple_http_request;
 
 typedef struct simple_http_webs
 {
-	int 					fd;
-	FILE 					*FilePtr;
-	simpple_http_request 	*request;
+    int                      fd;
+    FILE                     *FilePtr;
+    simpple_http_request     *request;
 } simple_http_webs;
 
 typedef void (*urlCallback)(simple_http_webs *web);
 
 typedef struct simple_http_request_handler
 {
-	char path[PATH_MAX_LENGTH];
-	urlCallback f;
+    char path[PATH_MAX_LENGTH];
+    urlCallback f;
 } simple_http_request_handler;
 
 void simple_http_server_init(int port);

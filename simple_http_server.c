@@ -217,32 +217,32 @@ extern int path_compare(const void *path1, const void *path2);
 
 static simple_http_webs* create_simple_http_webs(int fd)
 {
-	simple_http_webs* webs = (simple_http_webs*) malloc(
-			sizeof(simple_http_webs));
-	if (webs) {
-		memset(webs, 0, sizeof(simple_http_webs));
-		webs->fd = fd;
-		webs->FilePtr = fdopen(webs->fd, "r+b");
-	}
+    simple_http_webs* webs = (simple_http_webs*) malloc(
+            sizeof(simple_http_webs));
+    if (webs) {
+        memset(webs, 0, sizeof(simple_http_webs));
+        webs->fd = fd;
+        webs->FilePtr = fdopen(webs->fd, "r+b");
+    }
 
-	return webs;
+    return webs;
 }
 
 static void destroy_simple_http_webs(simple_http_webs*webs)
 {
-	if (webs) {
+    if (webs) {
 
-		fclose(webs->FilePtr);
-		webs->FilePtr = NULL;
-		webs->fd = 0;
+        fclose(webs->FilePtr);
+        webs->FilePtr = NULL;
+        webs->fd = 0;
 
-		if (webs->request) {
-			destroy_simpple_http_request(webs->request);
-			webs->request = NULL;
-		}
+        if (webs->request) {
+            destroy_simpple_http_request(webs->request);
+            webs->request = NULL;
+        }
 
-		free(webs);
-	}
+        free(webs);
+    }
 }
 
 
@@ -262,30 +262,30 @@ static void doResponse(simple_http_webs *webs)
 
 static void handleRequest(int cfd)
 {
-	simple_http_webs *webs = create_simple_http_webs(cfd);
-	if (webs) {
+    simple_http_webs *webs = create_simple_http_webs(cfd);
+    if (webs) {
 
-		parse_simpple_http_request(webs);
+        parse_simpple_http_request(webs);
 
-		if (webs->request) {
-			Dprintf("request line : %d %s %s\n", webs->request->requestLine.method,
-					webs->request->requestLine.path, webs->request->requestLine.version);
+        if (webs->request) {
+            Dprintf("request line : %d %s %s\n", webs->request->requestLine.method,
+                    webs->request->requestLine.path, webs->request->requestLine.version);
 
-			int i;
-			for (i = 0; i < webs->request->numRequestHeaderFields; ++i) {
+            int i;
+            for (i = 0; i < webs->request->numRequestHeaderFields; ++i) {
 
-				Dprintf("HeaderFields #%d : %s : %s", i,
-						webs->request->requestHeaderFields[i].name,
-						webs->request->requestHeaderFields[i].data);
-			}
-			doResponse(webs);
+                Dprintf("HeaderFields #%d : %s : %s", i,
+                        webs->request->requestHeaderFields[i].name,
+                        webs->request->requestHeaderFields[i].data);
+            }
+            doResponse(webs);
 
-		} else {
-			Dprintf("parse_simpple_http_request fail\n");
-		}
+        } else {
+            Dprintf("parse_simpple_http_request fail\n");
+        }
 
-		destroy_simple_http_webs(webs);
-	}
+        destroy_simple_http_webs(webs);
+    }
 }
 
 #if 0
@@ -338,7 +338,9 @@ void simple_http_server_start()
     is_running = 1;
 
     for (; is_running != 0;) {
+
         Dprintf("waiting for new connection\n");
+
         len = sizeof(struct sockaddr_in6);
         cfd = accept(sfd, (struct sockaddr *) &addr, &len); /* Wait for connection */
         if (cfd == -1) {
