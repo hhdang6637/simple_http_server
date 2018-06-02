@@ -11,6 +11,10 @@
 #ifndef INET_SOCKETS_H
 #define INET_SOCKETS_H          /* Prevent accidental double inclusion */
 
+#include <unistd.h>
+
 int openTcpServerSocket(int backlog, int port);
+int openTcpClientSocket(const char*hostname, int port);
+ssize_t readLine(int fd, void *buffer, size_t n);
 
 #endif
