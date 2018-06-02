@@ -18,41 +18,6 @@
 #include "inet_sockets.h"
 #include "simple_http_server.h"
 
-typedef struct simpple_http_request_header_field
-{
-    char *name;
-    char *data;
-} simpple_http_request_header_field;
-
-typedef enum simpple_http_request_method {
-    GET         = 0,
-    HEAD        = 1,
-    POST        = 2,
-    PUT         = 3,
-    DELETE      = 4,
-    CONNECT     = 5,
-    OPTIONS     = 6,
-    TRACE       = 7,
-    PATCH       = 8,
-    METHOD_MAX
-} simpple_http_request_method;
-
-typedef struct simpple_http_request_line
-{
-    simpple_http_request_method method;
-    char                        path[PATH_MAX_LENGTH];
-    char                        version[VERSION_MAX_LENGTH];
-} simpple_http_request_line;
-
-#define MAX_FIELDS  20
-
-typedef struct simpple_http_request
-{
-    simpple_http_request_line           requestLine;
-    simpple_http_request_header_field   requestHeaderFields[MAX_FIELDS]; // end with NULL pointer
-    int numRequestHeaderFields;
-} simpple_http_request;
-
 /*****************************************************************************/
 
 static int simpple_http_request_port = 0;
@@ -201,7 +166,7 @@ static int parse_simpple_http_request_next_line(const char *line, simpple_http_r
     return 0;
 }
 
-static simpple_http_request* parse_simpple_http_request(FILE *f)
+static simpple_http_request* parse_simpple_http_request(simple_http_webs *webs)
 {
     int first = 1;
     char buf[1024];
@@ -211,7 +176,7 @@ static simpple_http_request* parse_simpple_http_request(FILE *f)
 
     do {
 
-        if (fgets(buf, sizeof(buf), f) == NULL) {
+        if (fgets(buf, sizeof(buf), webs->FilePtr) == NULL) {
             break;
         }
 
@@ -240,49 +205,87 @@ static simpple_http_request* parse_simpple_http_request(FILE *f)
         header = NULL;
     }
 
+    webs->request = header;
+
     return header;
 }
-
-static void doResponse(FILE *f, simpple_http_request *request);
-void doResponseNotFound(FILE *f);
+static simple_http_webs* create_simple_http_webs(int fd);
+static void doResponse(simple_http_webs *webs);
 static void handleRequest(int cfd);
 
 extern int path_compare(const void *path1, const void *path2);
 
-static void doResponse(FILE *f, simpple_http_request *request)
+static simple_http_webs* create_simple_http_webs(int fd)
+{
+	simple_http_webs* webs = (simple_http_webs*) malloc(
+			sizeof(simple_http_webs));
+	if (webs) {
+		memset(webs, 0, sizeof(simple_http_webs));
+		webs->fd = fd;
+		webs->FilePtr = fdopen(webs->fd, "r+b");
+	}
+
+	return webs;
+}
+
+static void destroy_simple_http_webs(simple_http_webs*webs)
+{
+	if (webs) {
+
+		fclose(webs->FilePtr);
+		webs->FilePtr = NULL;
+		webs->fd = 0;
+
+		if (webs->request) {
+			destroy_simpple_http_request(webs->request);
+			webs->request = NULL;
+		}
+
+		free(webs);
+	}
+}
+
+
+static void doResponse(simple_http_webs *webs)
 {
     simple_http_request_handler h;
     void *found;
-    memcpy(h.path, request->requestLine.path, PATH_MAX_LENGTH);
+    memcpy(h.path, webs->request->requestLine.path, PATH_MAX_LENGTH);
 
     if ((found = tfind((const void*) &h, &rootOfUrlCallbacks, path_compare)) != NULL) {
-        (*((simple_http_request_handler**) found))->f(f);
+        (*((simple_http_request_handler**) found))->f(webs);
     } else {
-        Dprintf("cannot handle url : %s\n", request->requestLine.path);
-        doResponseNotFound(f);
+        Dprintf("cannot handle url : %s\n", webs->request->requestLine.path);
+        doResponseNotFound(webs);
     }
 }
 
 static void handleRequest(int cfd)
 {
-	FILE *f = fdopen(cfd, "r+b");
-    simpple_http_request *request = parse_simpple_http_request(f);
-    if (request) {
-        Dprintf("request line : %d %s %s\n", request->requestLine.method, request->requestLine.path, request->requestLine.version);
+	simple_http_webs *webs = create_simple_http_webs(cfd);
+	if (webs) {
 
-        int i;
-        for (i = 0; i < request->numRequestHeaderFields; ++i) {
+		parse_simpple_http_request(webs);
 
-            Dprintf("HeaderFields #%d : %s : %s", i, request->requestHeaderFields[i].name,
-                    request->requestHeaderFields[i].data);
-        }
-        doResponse(f, request);
-        destroy_simpple_http_request(request);
-    } else {
-        Dprintf("parse_simpple_http_request fail\n");
-    }
+		if (webs->request) {
+			Dprintf("request line : %d %s %s\n", webs->request->requestLine.method,
+					webs->request->requestLine.path, webs->request->requestLine.version);
 
-    fclose(f);
+			int i;
+			for (i = 0; i < webs->request->numRequestHeaderFields; ++i) {
+
+				Dprintf("HeaderFields #%d : %s : %s", i,
+						webs->request->requestHeaderFields[i].name,
+						webs->request->requestHeaderFields[i].data);
+			}
+			doResponse(webs);
+
+		} else {
+			Dprintf("parse_simpple_http_request fail\n");
+		}
+
+		destroy_simple_http_webs(webs);
+	}
 }
 
 #if 0
@@ -300,9 +303,9 @@ static void doResponseHtml(FILE *f, const char *html_content)
 }
 #endif
 
-void doResponseNotFound(FILE *f)
+void doResponseNotFound(simple_http_webs *web)
 {
-    fprintf(f, "HTTP/1.1 404"
+    fprintf(web->FilePtr, "HTTP/1.1 404"
             "\r\n"
             "\r\n");
 }
@@ -351,6 +354,7 @@ void simple_http_server_start()
 
         handleRequest(cfd);
     }
+
     Dprintf("exit loop\n");
 }
 

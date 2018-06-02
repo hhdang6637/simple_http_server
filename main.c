@@ -27,11 +27,11 @@ static void register_signal_handler()
     }
 }
 
-static void urlIndexHandler(FILE *f)
+static void urlIndexHandler(simple_http_webs *webs)
 {
     const char*str = "<H1>HELLO!</H1>";
 
-    fprintf(f, "HTTP/1.1 200"
+    fprintf(webs->FilePtr, "HTTP/1.1 200"
             "\r\n"
             "content-length: %zu"
             "\r\n"
