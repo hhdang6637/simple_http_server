@@ -251,12 +251,12 @@ extern int path_compare(const void *path1, const void *path2);
 
 static void doResponse(FILE *f, simpple_http_request *request)
 {
-    simpple_http_request_handler h;
+    simple_http_request_handler h;
     void *found;
     memcpy(h.path, request->requestLine.path, PATH_MAX_LENGTH);
 
     if ((found = tfind((const void*) &h, &rootOfUrlCallbacks, path_compare)) != NULL) {
-        (*((simpple_http_request_handler**) found))->f(f);
+        (*((simple_http_request_handler**) found))->f(f);
     } else {
         Dprintf("cannot handle url : %s\n", request->requestLine.path);
         doResponseNotFound(f);

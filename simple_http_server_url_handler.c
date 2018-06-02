@@ -15,7 +15,7 @@ extern void *rootOfUrlCallbacks;
 
 int path_compare(const void *path1, const void *path2)
 {
-    return strcmp(((simpple_http_request_handler*) path1)->path, ((simpple_http_request_handler*) path2)->path);
+    return strcmp(((simple_http_request_handler*) path1)->path, ((simple_http_request_handler*) path2)->path);
 }
 
 int simple_http_server_add_handler(const char *path, urlCallback f)
@@ -24,8 +24,8 @@ int simple_http_server_add_handler(const char *path, urlCallback f)
 
     Dprintf("enter %s\n", __FUNCTION__);
 
-    simpple_http_request_handler* handler = (simpple_http_request_handler*) malloc(
-            sizeof(simpple_http_request_handler));
+    simple_http_request_handler* handler = (simple_http_request_handler*) malloc(
+            sizeof(simple_http_request_handler));
 
     snprintf(handler->path, PATH_MAX_LENGTH, "%s", path);
 
@@ -35,7 +35,7 @@ int simple_http_server_add_handler(const char *path, urlCallback f)
     if (val == NULL) {
         Dprintf("tsearch cannot allocate new node\n");
         return 0;
-    } else if ((*(simpple_http_request_handler **) val) != handler) {
+    } else if ((*(simple_http_request_handler **) val) != handler) {
         Dprintf("path (%s) was existed in the tree\n", path);
         free(handler);
         return 0;

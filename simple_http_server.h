@@ -17,11 +17,11 @@
 
 typedef void (*urlCallback)(FILE *);
 
-typedef struct simpple_http_request_handler
+typedef struct simple_http_request_handler
 {
     char path[PATH_MAX_LENGTH];
     urlCallback f;
-} simpple_http_request_handler;
+} simple_http_request_handler;
 
 void simple_http_server_init(int port);
 int  simple_http_server_add_handler(const char *path, urlCallback f);
