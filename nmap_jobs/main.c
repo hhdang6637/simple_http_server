@@ -8,6 +8,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "ipify.h"
+
 typedef struct nmap_host {
     char    ip[32];
     int     open_ports[16];
@@ -80,7 +82,7 @@ static int parse_line_2_nmap_host(const char *line, nmap_host *host_info) {
     return 0;
 }
 
-static void run_nmap() {
+static void run_nmap(const char *ip) {
     FILE *f;
     char command[128];
     char port_list[128];
@@ -89,7 +91,7 @@ static void run_nmap() {
     nmap_host host_info;
 
     snprintf(port_list, sizeof(port_list), "80,443,22,21");
-    snprintf(subnet, sizeof(subnet), "115.72.54.91/24");
+    snprintf(subnet, sizeof(subnet), "%s/16", ip);
 
     static const char* NMAP_COMMAND = "nmap -n -oG - ";
 
@@ -106,7 +108,18 @@ static void run_nmap() {
 }
 
 int main(int argc, char **argv) {
-    run_nmap();
+    char ip[32];
+    size_t len = 32;
+
+    if (get_ip_address_via_ipify(ip, &len)) {
+
+        printf("Your IP : %s\n", ip);
+        run_nmap(ip);
+
+    } else {
+        fprintf(stderr, "cannot get your ip from ipify\n");
+    }
+
     return 0;
 }
 

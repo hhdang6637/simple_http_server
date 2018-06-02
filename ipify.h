@@ -8,6 +8,6 @@
 #ifndef SIMPLE_HTTP_SERVER_IPIFY_H_
 #define SIMPLE_HTTP_SERVER_IPIFY_H_
 
-int get_ip_address_via_ipify(char *ip, int *iplen);
+int get_ip_address_via_ipify(char *ip, size_t *iplen);
 
 #endif /* SIMPLE_HTTP_SERVER_IPIFY_H_ */

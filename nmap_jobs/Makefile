@@ -1,9 +1,11 @@
 CXX=gcc
-CXXFLAGS=-g -Wall
+CXXFLAGS=-g -Wall -I..
 INCLUDES=
 BIN=nmap_jobs
 
 SRCS=$(wildcard *.c)
+SRCS += ../ipify.c
+SRCS += ../inet_sockets.c
 
 %.o : %.c
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $< -c -o $@
