@@ -21,20 +21,24 @@ typedef struct nmap_host {
 } nmap_host;
 
 static void dump_nmap_host (nmap_host *info) {
+    char line[256];
+    int len = 0;
     nmap_port_state *p = info->ports;
+    int any_port_opened = 0;
 
-    fprintf(stderr, "%s,", info->ip);
+    len += snprintf(line + len, sizeof(line) - len,"%s", info->ip);
 
     while(p->port) {
-
         if (p->opened) {
-            fprintf(stderr, "%d,", p->port);
+            len += snprintf(line + len, sizeof(line) - len,",%d", p->port);
+            any_port_opened++;
         }
-
         p++;
     }
 
-    fprintf(stderr, "\n");
+    if (any_port_opened) {
+        fprintf(stdout, "%s\n", line);
+    }
 }
 
 static int parse_line_2_nmap_host(const char *line, nmap_host *host_info) {
@@ -106,12 +110,14 @@ static void run_nmap(const char *ip) {
     nmap_host host_info;
 
     snprintf(port_list, sizeof(port_list), "80,443,22,21");
-    snprintf(subnet, sizeof(subnet), "%s/24", ip);
+    snprintf(subnet, sizeof(subnet), "%s/16", ip);
+
+    fprintf(stdout, "Subnet: %s\n", subnet);
 
     static const char* NMAP_COMMAND = "nmap -n -oG - ";
 
     snprintf(command, sizeof(command), "%s -p %s %s", NMAP_COMMAND, port_list, subnet);
-    fprintf(stderr, "command: %s\n", command);
+    // fprintf(stderr, "command: %s\n", command);
 
     f = popen(command, "r");
     if (f) {
@@ -128,11 +134,12 @@ int main(int argc, char **argv) {
 
     if (get_ip_address_via_ipify(ip, &len)) {
 
-        printf("Your IP : %s\n", ip);
+        // printf("Your IP : %s\n", ip);
         run_nmap(ip);
 
     } else {
         fprintf(stderr, "cannot get your ip from ipify\n");
+        return 1;
     }
 
     return 0;

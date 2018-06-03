@@ -11,7 +11,7 @@ SRCS=$(wildcard *.c)
 OBJS   = $(patsubst %.c,%.o,$(SRCS))
 
 $(BIN): $(OBJS)
-	$(CXX) $(CXXFLAGS) $(OBJS) -o $(BIN)
+	$(CXX) $(CXXFLAGS) $(OBJS) -o $(BIN) -lpthread
 
 clean:
 	rm -f $(OBJS) $(BIN)
